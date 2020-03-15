@@ -2,7 +2,7 @@
 
 #include "common/types/Uri.hpp"
 
-#include <webkit/webkit.h>
+#include <webkit2/webkit2.h>
 
 namespace ph = std::placeholders;
 
@@ -50,7 +50,20 @@ void WebViewGtk::enableTransparency()
     handler_.signal_screen_changed().connect(std::bind(&WebViewGtk::screenChanged, this, ph::_1));
     screenChanged(handler_.get_screen());
 
-    webkit_web_view_set_transparent(webView_, true);
+    // the block below is equivalent to run "webkit_web_view_set_transparent(webView_, true)"
+    {
+
+        gtk_widget_set_app_paintable (reinterpret_cast<GtkWidget*>(handler_.gobj()), true);
+
+        static const GdkRGBA transparent = {1.0, 1.0, 1.0, 0.0};
+        webkit_web_view_set_background_color(webView_, &transparent);
+
+        // tip from last answer in:
+        //    https://stackoverflow.com/questions/16832581/how-do-i-make-a-gtkwindow-background-transparent-on-linux]
+        handler_.show_all();
+        handler_.set_opacity(0.99);
+
+    }
 }
 
 void WebViewGtk::screenChanged(const Glib::RefPtr<Gdk::Screen>& screen)
