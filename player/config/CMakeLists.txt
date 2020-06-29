@@ -13,6 +13,10 @@ add_library(${PROJECT_NAME}
     AppConfig.cpp
     AppConfig.hpp
 )
+
 target_link_libraries(${PROJECT_NAME}
+    fs
+    logger
+    types
     common
 )
